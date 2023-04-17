@@ -1,0 +1,23 @@
+[project]
+name = "OPX_Plus"
+version = "0.1.0"
+authors = [
+  { name="Steven Wilson", github="https://github.com/StevenWilson9" },
+]
+description = "Adds additional functionality on top of OpenPyXL"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/pypa/sampleproject"
+"Bug Tracker" = "https://github.com/pypa/sampleproject/issues"
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
