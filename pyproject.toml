@@ -14,8 +14,8 @@ classifiers = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/pypa/sampleproject"
-"Bug Tracker" = "https://github.com/pypa/sampleproject/issues"
+"Homepage" = "https://github.com/StevenWilson9/OPX_Plus"
+"Bug Tracker" = "https://github.com/StevenWilson9/OPX_Plus/issues"
 
 
 [build-system]
