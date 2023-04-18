@@ -169,7 +169,7 @@ def paste_csv_vals_to_sheet(csv_path, to_sheet, include_header=False):
         print(f'C&Ped VALUEs from {csv_path.split("/")[-1]} to "{to_sheet.title}"')
 
 
-def copy_over_and_down_formulas(from_ws, to_ws, formula_cells):
+def paste_csv_vals_to_sheet(csv_path, to_sheet, include_header=False):
     for row in openpyxl.utils.rows_from_range(formula_cells):
         c_list = []
         for cell in row:
