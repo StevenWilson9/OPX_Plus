@@ -2,6 +2,13 @@
 
 OPX_Plus (OpenPyXL Plus) is an extension to [OpenPyXL](https://pypi.org/project/openpyxl/), a module for reading and writing .xlsx and similar files. **OPX_Plus** adds functions centred around creating regular reports based on a template file. You can log issues on the [GitHub page](https://github.com/StevenWilson9/OPX_Plus/issues).
 
+### Has the Following Dependencies
+```
+import openpyxl, glob, webbrowser, warnings, csv, datetime, os, time
+from copy import copy
+from openpyxl.formula.translate import Translator
+```
+
 ## Additional Functions
 ### Files
 - get_file_path(file_path, name_search, *if_missing_urls)
