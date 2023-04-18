@@ -14,12 +14,14 @@ from openpyxl.formula.translate import Translator
 - get_file_path(file_path, name_search, *if_missing_urls)
 - check_mandatory_files(f_list)
 - 0pen_template(template_path: object, *date_cells: str)
+- open_vals_only_sheet(from_wb_path, sheet_id=0)
 - save_file(new_file_location, file_name, workbook, afterdatetext="", previousday=False)
 - remove(file_path)
 ### Move Data
-- open_vals_only_sheet(from_wb_path, sheet_id=0)
 - paste_sheet_to_sheet(from_ws, to_ws, cell_range)
 - paste_csv_vals_to_sheet(csv_path, to_sheet, include_header=False)
+- 
+- copy_over_and_down_formulas(from_ws, to_ws, formula_cells)
 - paste_cells_to_cells(from_ws, to_ws, from_cell_range, offset=(0, 0))
 
 ### Sub-Functions
