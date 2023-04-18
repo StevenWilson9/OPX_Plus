@@ -1,6 +1,6 @@
 [project]
-name = "OPX_Plus"
-version = "0.1.0"
+name = "OPX-Plus"
+version = "0.1.1"
 authors = [
   { name="Steven Wilson", github="https://github.com/StevenWilson9" },
 ]
