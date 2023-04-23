@@ -1,5 +1,5 @@
 [project]
-name = "OPX-Plus"
+name = "opx_plus"
 version = "0.1.1"
 authors = [
   { name="Steven Wilson", github="https://github.com/StevenWilson9" },
@@ -7,6 +7,11 @@ authors = [
 description = "Adds additional functionality on top of OpenPyXL"
 readme = "README.md"
 requires-python = ">=3.8"
+
+dependencies = [
+    "openpyxl~=3.0.9"
+]
+
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
