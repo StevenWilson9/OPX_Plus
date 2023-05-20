@@ -15,7 +15,7 @@ from openpyxl.formula.translate import Translator
 get_file_path(file_path, name_search, *if_missing_urls)
 check_mandatory_files(f_list)
 
-0pen_template(template_path: object, *date_cells: str)
+open_template(template_path: object, *date_cells: str)
 open_vals_only_sheet(from_wb_path, sheet_id=0)
 
 save_file(new_file_location, file_name, workbook, afterdatetext="", previousday=False)
