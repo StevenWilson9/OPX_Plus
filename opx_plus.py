@@ -86,11 +86,15 @@ def check_mandatory_files(f_list):
         print("------------------")
 
 
-def open_template(template_path: object, *date_cells: str) -> object:
+def open_template(template_path: object, *date_cells: str, previous_day=False) -> object:
     wb = openpyxl.load_workbook(template_path)
     ws = wb[wb.sheetnames[0]]
     print(f'Opened "{ws.title}" from "{template_path.split("/")[-1]}"')
-    today_date = datetime.date.today()
+
+    if previous_day:
+        today_date = datetime.date.today() - datetime.timedelta(days=1)
+    else:
+        today_date = datetime.date.today()
 
     for cell in date_cells:
         ws[cell] = today_date
@@ -98,13 +102,13 @@ def open_template(template_path: object, *date_cells: str) -> object:
     return wb, ws
 
 
-def save_file(new_file_location, file_name, workbook, afterdatetext="", previousday=False):
-    if afterdatetext != "":
-        afterdatetext = " " + afterdatetext
-    if previousday:
-        new_file_path = f'{new_file_location}{file_name} {datetime.date.today() - datetime.timedelta(days=1)}{afterdatetext}.xlsx'
+def save_file(new_file_location, file_name, workbook, after_date_text="", previous_day=False):
+    if after_date_text != "":
+        after_date_text = " " + after_date_text
+    if previous_day:
+        new_file_path = f'{new_file_location}{file_name} {datetime.date.today() - datetime.timedelta(days=1)}{after_date_text}.xlsx'
     else:
-        new_file_path = f'{new_file_location}{file_name} {datetime.date.today()}{afterdatetext}.xlsx'
+        new_file_path = f'{new_file_location}{file_name} {datetime.date.today()}{after_date_text}.xlsx'
     workbook.save(new_file_path)
     print(f'saved at: {new_file_path}')
     print(f"Opening {new_file_path.split('/')[-1]}")
@@ -167,6 +171,28 @@ def paste_csv_vals_to_sheet(csv_path, to_sheet, include_header=False):
         print(f'C&Ped VALUE & HEADERs from {csv_path.split("/")[-1]} to "{to_sheet.title}"')
     else:
         print(f'C&Ped VALUEs from {csv_path.split("/")[-1]} to "{to_sheet.title}"')
+
+
+def paste_df_to_sheet(df, to_sheet, include_header=False):
+    data = df.values.tolist()
+    if include_header:
+        data = [df.columns.tolist()] + data
+
+    row_incrementer = 1
+    if not include_header:
+        data = data[1:]
+        row_incrementer += 1
+
+    for row_index, row in enumerate(data):
+        for column_index, cell in enumerate(row):
+            column_letter = openpyxl.utils.get_column_letter(column_index + 1)
+            s = cell
+            if s is not None:
+                try:
+                    s = float(s)
+                except ValueError:
+                    pass
+            to_sheet[f'{column_letter}{row_index + row_incrementer}'].value = s
 
 
 def copy_over_and_down_formulas(from_ws, to_ws, formula_cells):
