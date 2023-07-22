@@ -178,7 +178,7 @@ def paste_df_to_sheet(df, to_sheet, include_header=False):
     if include_header:
         data = [df.columns.tolist()] + data
 
-    row_incrementer = 1
+    row_incrementer = 0
     if not include_header:
         data = data[1:]
         row_incrementer += 1
