@@ -25,7 +25,7 @@ from openpyxl.formula.translate import Translator
 - open_vals_only_sheet(from_wb_path, sheet_id=0):
 - paste_sheet_to_sheet(from_ws, to_ws, cell_range)
 - paste_to_sheet(xlsx or csv file location, ws)
-- paste_df_to_sheet(df, to_sheet, include_header=False)
+- paste_df_to_sheet(df, to_ws, include_header=False)
 ```
 
 ### Move Data
@@ -36,8 +36,8 @@ from openpyxl.formula.translate import Translator
 
 ### Sub-Functions
 ```
-- count_rows(worksheet)
-- count_cols(worksheet)
+- count_rows(ws)
+- count_columns(ws)
 - num_to_excel_col(n)
 - excel_col_to_num(a)
 
