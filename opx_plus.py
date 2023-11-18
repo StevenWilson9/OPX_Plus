@@ -276,6 +276,28 @@ def paste_df_to_sheet(df, to_ws):
             to_ws[f'{column_letter}{row_index + row_incrementer+1}'].value = s
 
 
+def paste_df_to_sheet(df, to_sheet, include_header=False):
+    data = df.values.tolist()
+    if include_header:
+        data = [df.columns.tolist()] + data
+
+    row_incrementer = 0
+    if not include_header:
+        data = data[1:]
+        row_incrementer += 1
+
+    for row_index, row in enumerate(data):
+        for column_index, cell in enumerate(row):
+            column_letter = openpyxl.utils.get_column_letter(column_index + 1)
+            s = cell
+            if s is not None:
+                try:
+                    s = float(s)
+                except ValueError:
+                    pass
+            to_sheet[f'{column_letter}{row_index + row_incrementer}'].value = s
+
+
 def copy_over_and_down_formulas(from_ws, to_ws, formula_cells):
     for row in openpyxl.utils.rows_from_range(formula_cells):
         c_list = []
