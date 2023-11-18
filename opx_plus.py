@@ -22,6 +22,74 @@ def to_unix_time(year=datetime.datetime.now().year, month=datetime.datetime.now(
     # subtract = datetime.timedelta(days=0, seconds=0)
 
 
+def num_to_excel_col(n):
+    """
+    Converts a column number to a Excel column alphabet
+    eg 27 -> AA
+    """
+
+    if n < 1:
+        raise ValueError("Number must be positive")
+    result = ""
+    while True:
+        if n > 26:
+            n, r = divmod(n - 1, 26)
+            result = chr(r + ord('A')) + result
+        else:
+            return chr(n + ord('A') - 1) + result
+
+
+def excel_col_to_num(a):
+    """
+    Converts a Excel column alphabet to a column number
+    eg AA -> 27
+    """
+
+    if len(a) > 1:
+        result = 0
+        for l in [*a]:
+            result += ord(l) - ord('A') + 1
+            return result
+    else:
+        return ord(a) - ord('A') + 1
+
+
+def count_rows(ws):
+    rows = 5
+    cell = "B" + str(rows)
+
+    while ws[cell].value is not None:
+        cell = "B" + str(rows)
+        rows += 1
+    rows -= 2
+    # print(f'{rows} rows in sheet "{worksheet.title}"')
+    return rows
+
+
+def count_columns(ws):
+    cols = 1
+    cell = str(num_to_excel_col(cols)) + "1"
+
+    while ws[cell].value is not None:
+        cell = str(num_to_excel_col(cols)) + "1"
+        cols += 1
+    cols -= 2
+    cols = num_to_excel_col(cols)
+    return cols
+
+
+def paste_cells_to_cells(from_ws, to_ws, from_cell_range, offset=(0, 0)):
+    x_offset, y_offset = offset
+    for row in openpyxl.utils.rows_from_range(from_cell_range):
+        for cell in row:
+            col2 = num_to_excel_col(excel_col_to_num(cell.rstrip('1234567890')) + x_offset)
+            row2 = int(cell.lstrip('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')) + y_offset
+            cell2 = f"{col2}{row2}"
+
+            to_ws[cell2] = from_ws[cell].value
+    print(f'C&Ped VALUEs from "{from_ws.title}" to "{to_ws.title}"')
+
+
 def date_ranger():
     yesterday_date = datetime.date.today() - datetime.timedelta(days=1)
 
@@ -46,19 +114,7 @@ def date_ranger():
 def get_file_path(file_path, name_search, *if_missing_urls):
     full_file_path = glob.glob(f'{file_path}{name_search}')
 
-    if len(full_file_path) == 0:
-        error_message = True
-        for url in if_missing_urls:
-            if url.startswith("http") or url.startswith("file:/"):
-                webbrowser.open(url)
-            else:
-                error_message = False
-                print(url)
-        if error_message:
-            print(f'MISSING: {name_search} file in {file_path}.')
-        return "not found"
-
-    elif len(full_file_path) > 1:
+    if len(full_file_path) > 1:
         print("------------------")
         print(f'Multiple files fitting {name_search} search, found in {file_path}.')
         for path in full_file_path:
@@ -67,14 +123,30 @@ def get_file_path(file_path, name_search, *if_missing_urls):
         print("------------------")
         return "not found"
 
-    file_path = full_file_path[0]
-    extension = os.path.splitext(file_path)[1]
-    if extension not in ['.csv', '.xlsx']:
-        print(f"ERROR: File extension {extension} is not supported. Only .csv and .xlsx files are supported.")
-        return "not found"
+    if len(full_file_path) == 0:
+        print(f'MISSING: {name_search} file in {file_path}.')
 
-    print(f"Found: {file_path.split('/')[-1]}")
-    return file_path
+    else:
+        file_path = full_file_path[0]
+        extension = os.path.splitext(file_path)[1]
+
+        if extension in ['.csv', '.xlsx']:
+            print(f"Found: {file_path.split('/')[-1]}")
+            return file_path
+
+        elif file_path.endswith(".json"):
+            print(".JSON file detected.")
+            remove(file_path)
+
+        else:
+            print(f"File not recognized: {file_path}")
+
+    for url in if_missing_urls:
+        if url.startswith("http") or url.startswith("file:/"):
+            webbrowser.open(url)
+        else:
+            print(url)
+    return "not found"
 
 
 def check_mandatory_files(f_list):
@@ -86,11 +158,15 @@ def check_mandatory_files(f_list):
         print("------------------")
 
 
-def open_template(template_path: object, *date_cells: str) -> object:
+def open_template(template_path: object, *date_cells: str, previous_day=False) -> object:
     wb = openpyxl.load_workbook(template_path)
     ws = wb[wb.sheetnames[0]]
     print(f'Opened "{ws.title}" from "{template_path.split("/")[-1]}"')
-    today_date = datetime.date.today()
+
+    if previous_day:
+        today_date = datetime.date.today() - datetime.timedelta(days=1)
+    else:
+        today_date = datetime.date.today()
 
     for cell in date_cells:
         ws[cell] = today_date
@@ -98,13 +174,13 @@ def open_template(template_path: object, *date_cells: str) -> object:
     return wb, ws
 
 
-def save_file(new_file_location, file_name, workbook, afterdatetext="", previousday=False):
-    if afterdatetext != "":
-        afterdatetext = " " + afterdatetext
-    if previousday:
-        new_file_path = f'{new_file_location}{file_name} {datetime.date.today() - datetime.timedelta(days=1)}{afterdatetext}.xlsx'
+def save_file(new_file_location, file_name, workbook, after_date_text="", previous_day=False):
+    if after_date_text != "":
+        after_date_text = " " + after_date_text
+    if previous_day:
+        new_file_path = f'{new_file_location}{file_name} {datetime.date.today() - datetime.timedelta(days=1)}{after_date_text}.xlsx'
     else:
-        new_file_path = f'{new_file_location}{file_name} {datetime.date.today()}{afterdatetext}.xlsx'
+        new_file_path = f'{new_file_location}{file_name} {datetime.date.today()}{after_date_text}.xlsx'
     workbook.save(new_file_path)
     print(f'saved at: {new_file_path}')
     print(f"Opening {new_file_path.split('/')[-1]}")
@@ -147,7 +223,7 @@ def paste_sheet_to_sheet(from_ws, to_ws, cell_range):
     print(f'C&Ped VALUEs from "{from_ws.title}" to "{to_ws.title}" for {rows} rows')
 
 
-def paste_csv_vals_to_sheet(csv_path, to_sheet, include_header=False):
+def paste_csv_vals_to_sheet(csv_path, to_ws, include_header=False):
     with open(csv_path, "r") as f:
         row_incrementer = 1
         reader = csv.reader(f)
@@ -162,11 +238,42 @@ def paste_csv_vals_to_sheet(csv_path, to_sheet, include_header=False):
                     s = float(s)
                 except ValueError:
                     pass
-                to_sheet[f'{column_letter}{row_index + row_incrementer}'].value = s
+                to_ws[f'{column_letter}{row_index + row_incrementer}'].value = s
     if include_header:
-        print(f'C&Ped VALUE & HEADERs from {csv_path.split("/")[-1]} to "{to_sheet.title}"')
+        print(f'C&Ped VALUE & HEADERs from {csv_path.split("/")[-1]} to "{to_ws.title}"')
     else:
-        print(f'C&Ped VALUEs from {csv_path.split("/")[-1]} to "{to_sheet.title}"')
+        print(f'C&Ped VALUEs from {csv_path.split("/")[-1]} to "{to_ws.title}"')
+
+
+def paste_to_sheet(file_path, to_ws):
+    if file_path.endswith(".xlsx"):
+        ws2 = open_vals_only_sheet(file_path, sheet_id=0)
+        last_col = count_columns(ws2)
+        cell_range = f"A2:{last_col}"
+        paste_sheet_to_sheet(ws2, to_ws, cell_range)
+
+    elif file_path.endswith(".csv"):
+        paste_csv_vals_to_sheet(file_path, to_ws, include_header=False)
+
+    else:
+        print(f"File not recognized: {file_path}")
+
+
+def paste_df_to_sheet(df, to_ws):
+    data = df.values.tolist()
+    row_incrementer = 0
+    data = [df.columns.tolist()] + data
+
+    for row_index, row in enumerate(data):
+        for column_index, cell in enumerate(row):
+            column_letter = openpyxl.utils.get_column_letter(column_index + 1)
+            s = cell
+            if s is not None:
+                try:
+                    s = float(s)
+                except ValueError:
+                    pass
+            to_ws[f'{column_letter}{row_index + row_incrementer+1}'].value = s
 
 
 def copy_over_and_down_formulas(from_ws, to_ws, formula_cells):
@@ -195,62 +302,6 @@ def copy_over_and_down_formulas(from_ws, to_ws, formula_cells):
 
     print(f'C&Ped FORUMULAs from "{from_ws.title}" to "{to_ws.title}" for {rows} rows')
     print("------------------")
-
-
-def count_rows(worksheet):
-    rows = 5
-    cell = "B" + str(rows)
-
-    while worksheet[cell].value is not None:
-        cell = "B" + str(rows)
-        rows += 1
-    rows -= 2
-    # print(f'{rows} rows in sheet "{worksheet.title}"')
-    return rows
-
-
-def num_to_excel_col(n):
-    """
-    Converts a column number to a Excel column alphabet
-    eg 27 -> AA
-    """
-
-    if n < 1:
-        raise ValueError("Number must be positive")
-    result = ""
-    while True:
-        if n > 26:
-            n, r = divmod(n - 1, 26)
-            result = chr(r + ord('A')) + result
-        else:
-            return chr(n + ord('A') - 1) + result
-
-
-def excel_col_to_num(a):
-    """
-    Converts a Excel column alphabet to a column number
-    eg AA -> 27
-    """
-
-    if len(a) > 1:
-        result = 0
-        for l in [*a]:
-            result += ord(l) - ord('A') + 1
-            return result
-    else:
-        return ord(a) - ord('A') + 1
-
-
-def paste_cells_to_cells(from_ws, to_ws, from_cell_range, offset=(0, 0)):
-    x_offset, y_offset = offset
-    for row in openpyxl.utils.rows_from_range(from_cell_range):
-        for cell in row:
-            col2 = num_to_excel_col(excel_col_to_num(cell.rstrip('1234567890')) + x_offset)
-            row2 = int(cell.lstrip('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')) + y_offset
-            cell2 = f"{col2}{row2}"
-
-            to_ws[cell2] = from_ws[cell].value
-    print(f'C&Ped VALUEs from "{from_ws.title}" to "{to_ws.title}"')
 
 
 def worksheet_reset(sheet_nam, wb):
